@@ -37,13 +37,26 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
 
 // --- IMAGE GENERATION SETUP ---
-const keyFilePath = path.join(__dirname, 'gen-lang-client-0255939494-145054a57acb.json');
-const clientOptions = {
-    keyFilename: keyFilePath,
-    apiEndpoint: 'us-central1-aiplatform.googleapis.com',
-};
 const project = 'gen-lang-client-0255939494';
 const location = 'us-central1';
+let clientOptions;
+
+if (process.env.VERCEL) {
+    // In Vercel, use the credentials from the environment variable
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    clientOptions = {
+        credentials,
+        apiEndpoint: 'us-central1-aiplatform.googleapis.com',
+    };
+} else {
+    // Locally, use the key file
+    const keyFilePath = path.join(__dirname, 'gen-lang-client-0255939494-145054a57acb.json');
+    clientOptions = {
+        keyFilename: keyFilePath,
+        apiEndpoint: 'us-central1-aiplatform.googleapis.com',
+    };
+}
+
 const predictionServiceClient = new PredictionServiceClient(clientOptions);
 
 // --- SOLANA SETUP ---
