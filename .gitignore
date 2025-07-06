@@ -9,7 +9,6 @@ ai.env
 gen-lang-client-*.json
 
 # Audio files
-/public/audio/
 
 # OS-specific
 .DS_Store
