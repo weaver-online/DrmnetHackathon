@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warden Character Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .question {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .question h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .options {
+            margin: 15px 0;
+        }
+        .option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #e9e9e9;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option:hover {
+            background: #d4edda;
+        }
+        .option.selected {
+            background: #28a745;
+            color: white;
+            border-color: #1e7e34;
+        }
+        .create-button {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        .create-button:hover {
+            background: #0056b3;
+        }
+        .create-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 5px solid #28a745;
+        }
+        .result h2 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Warden Character Tester</h1>
+    <p>Answer the three questions below to create your custom Warden character!</p>
+
+    <div class="question">
+        <h3>Question 1: What's your Warden's personality?</h3>
+        <div class="options">
+            <div class="option" data-question="1" data-answer="A">A) Confident & Outgoing</div>
+            <div class="option" data-question="1" data-answer="B">B) Cautious & Reserved</div>
+            <div class="option" data-question="1" data-answer="C">C) Blunt & Direct</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 2: What does your Warden look like?</h3>
+        <div class="options">
+            <div class="option" data-question="2" data-answer="A">A) The Hero (Achilles-type, golden hair)</div>
+            <div class="option" data-question="2" data-answer="B">B) The Veteran (dark skin, scars)</div>
+            <div class="option" data-question="2" data-answer="C">C) The Enforcer (bald, beard, tattoos)</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 3: What's your Warden's backstory?</h3>
+        <div class="options">
+            <div class="option" data-question="3" data-answer="A">A) Noble Warrior (family tradition)</div>
+            <div class="option" data-question="3" data-answer="B">B) Scarred Survivor (knows loss)</div>
+            <div class="option" data-question="3" data-answer="C">C) Bitter Mercenary (learned hard way)</div>
+        </div>
+    </div>
+
+    <button class="create-button" id="createButton" disabled>Create My Warden</button>
+
+    <div id="result" class="result hidden">
+        <h2>Your Warden Character:</h2>
+        <div id="wardenDetails"></div>
+    </div>
+
+    <script>
+        // Your existing Warden creation code
+        function generateAIName() {
+            const firstNames = ["Marcus", "Thane", "Gareth", "Roderick", "Vance", "Kael", "Darius", "Brennan", "Aldric", "Tormund", "Bjorn", "Cassius", "Drake", "Erik", "Finn"];
+            const lastNames = ["Ironshield", "Stormborn", "Blackstone", "Steelheart", "Grimward", "Battleborn", "Ironforge", "Darkbane", "Shadowmend", "Oathkeeper", "Ravencrest", "Wolfsbane"];
+            const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+            return `${randomFirst} ${randomLast}`;
+        }
+
+        function createWarden(userAnswers) {
+            const personalityMap = { "A": "confident_outgoing", "B": "cautious_reserved", "C": "blunt_direct" };
+            const appearanceMap = { "A": "handsome_achilles_golden_hair_strong_jawline", "B": "dark_skin_black_hair_battle_scars_weathered", "C": "bald_thick_beard_tattoos_intimidating" };
+            const backstoryMap = { "A": "noble_warrior_family_tradition_proud_heritage", "B": "scarred_survivor_knows_loss_protective_experience", "C": "bitter_mercenary_learned_hard_way_cynical_loyal" };
+            
+            return {
+                name: generateAIName(),
+                role: "Protector of the Party",
+                personality: {
+                    conversationStyle: personalityMap[userAnswers.question1],
+                    appearance: appearanceMap[userAnswers.question2],
+                    backstory: backstoryMap[userAnswers.question3]
+                }
+            };
+        }
+
+        // Interface code to connect buttons to your Warden creation
+        let selectedAnswers = {};
+
+        // Handle option selection
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.dataset.question;
+                const answer = this.dataset.answer;
+                
+                // Remove selection from other options in this question
+                document.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select this option
+                this.classList.add('selected');
+                selectedAnswers[`question${question}`] = answer;
+                
+                // Check if all questions are answered
+                checkAllAnswered();
+            });
+        });
+
+        function checkAllAnswered() {
+            if (selectedAnswers.question1 && selectedAnswers.question2 && selectedAnswers.question3) {
+                document.getElementById('createButton').disabled = false;
+            }
+        }
+
+        // Handle character creation
+        document.getElementById('createButton').addEventListener('click', function() {
+            const warden = createWarden(selectedAnswers);
+            displayWarden(warden);
+        });
+
+        function displayWarden(warden) {
+            const resultDiv = document.getElementById('result');
+            const detailsDiv = document.getElementById('wardenDetails');
+            
+            detailsDiv.innerHTML = `
+                <h3>🛡️ ${warden.name}</h3>
+                <p><strong>Role:</strong> ${warden.role}</p>
+                <p><strong>Conversation Style:</strong> ${warden.personality.conversationStyle.replace(/_/g, ' ')}</p>
+                <p><strong>Appearance:</strong> ${warden.personality.appearance.replace(/_/g, ' ')}</p>
+                <p><strong>Backstory:</strong> ${warden.personality.backstory.replace(/_/g, ' ')}</p>
+                <hr>
+                <p><em>Your answers: ${selectedAnswers.question1}-${selectedAnswers.question2}-${selectedAnswers.question3}</em></p>
+            `;
+            
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

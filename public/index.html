@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamnet Chronicles - Character Creation</title>
+    <meta name="description" content="Create your AI companions for an immersive post-apocalyptic adventure in the world of Dreamnet Chronicles.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Buffer polyfill for browser compatibility -->
+    <script>
+        // Create Buffer polyfill immediately - don't wait for external CDN
+        (function() {
+            // Enhanced Buffer polyfill that mimics Node.js Buffer behavior
+            function BufferPolyfill() {}
+            
+            BufferPolyfill.alloc = function(size, fill) {
+                const arr = new Uint8Array(size);
+                if (fill !== undefined) {
+                    if (typeof fill === 'number') {
+                        arr.fill(fill);
+                    } else if (typeof fill === 'string') {
+                        const fillBytes = new TextEncoder().encode(fill);
+                        for (let i = 0; i < size; i++) {
+                            arr[i] = fillBytes[i % fillBytes.length];
+                        }
+                    }
+                }
+                return arr;
+            };
+            
+            BufferPolyfill.from = function(data, encoding) {
+                if (data instanceof Uint8Array) {
+                    return new Uint8Array(data);
+                }
+                if (Array.isArray(data)) {
+                    return new Uint8Array(data);
+                }
+                if (typeof data === 'string') {
+                    if (encoding === 'hex') {
+                        const bytes = [];
+                        for (let i = 0; i < data.length; i += 2) {
+                            bytes.push(parseInt(data.substr(i, 2), 16));
+                        }
+                        return new Uint8Array(bytes);
+                    } else if (encoding === 'base64') {
+                        const binaryString = atob(data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        return bytes;
+                    } else {
+                        return new TextEncoder().encode(data);
+                    }
+                }
+                if (data && typeof data.buffer !== 'undefined') {
+                    return new Uint8Array(data.buffer);
+                }
+                return new Uint8Array(data);
+            };
+            
+            BufferPolyfill.concat = function(arrays, totalLength) {
+                if (!Array.isArray(arrays)) {
+                    throw new TypeError('arrays must be an array');
+                }
+                
+                const length = totalLength !== undefined ? totalLength :
+                    arrays.reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
+                const result = new Uint8Array(length);
+                let offset = 0;
+                
+                for (const arr of arrays) {
+                    if (arr && arr.length > 0) {
+                        const remaining = length - offset;
+                        const toCopy = Math.min(arr.length, remaining);
+                        result.set(arr.subarray ? arr.subarray(0, toCopy) : arr.slice(0, toCopy), offset);
+                        offset += toCopy;
+                        if (offset >= length) break;
+                    }
+                }
+                return result;
+            };
+            
+            BufferPolyfill.isBuffer = function(obj) {
+                return obj instanceof Uint8Array ||
+                       (obj && typeof obj === 'object' && obj.constructor === Uint8Array);
+            };
+            
+            // Make Buffer available globally
+            window.Buffer = BufferPolyfill;
+            console.log('✅ Enhanced Buffer polyfill created successfully');
+        })();
+    </script>
+    
+    <!-- Solana Web3.js for client-side NFT minting -->
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    
+    <!-- Ensure Solana Web3 is properly exposed -->
+    <script>
+        // The IIFE version should expose solanaWeb3 globally
+        window.addEventListener('load', function() {
+            // Check different possible exposures of Solana Web3
+            if (typeof window.solanaWeb3 === 'undefined') {
+                // Try alternative exposures
+                if (typeof window.SolanaWeb3 !== 'undefined') {
+                    window.solanaWeb3 = window.SolanaWeb3;
+                    console.log('✅ Mapped SolanaWeb3 to solanaWeb3');
+                } else if (typeof window.solana !== 'undefined' && window.solana.Connection) {
+                    // Don't override wallet solana object, but check if it has Web3 methods
+                    console.log('⚠️ Solana wallet detected, checking for Web3 methods...');
+                } else {
+                    console.error('❌ Solana Web3.js library not found on window object');
+                }
+            }
+            
+            console.log('🔍 Library loading check:');
+            console.log('window.solanaWeb3:', typeof window.solanaWeb3);
+            console.log('window.SolanaWeb3:', typeof window.SolanaWeb3);
+            console.log('window.solana (wallet):', typeof window.solana);
+            
+            // Log available Solana-related properties
+            const solanaKeys = Object.keys(window).filter(k => k.toLowerCase().includes('sol'));
+            console.log('All window keys with "sol":', solanaKeys);
+            
+            // Verify key classes are available
+            if (window.solanaWeb3) {
+                console.log('✅ solanaWeb3.Connection:', typeof window.solanaWeb3.Connection);
+                console.log('✅ solanaWeb3.Transaction:', typeof window.solanaWeb3.Transaction);
+                console.log('✅ solanaWeb3.PublicKey:', typeof window.solanaWeb3.PublicKey);
+                console.log('✅ solanaWeb3.Keypair:', typeof window.solanaWeb3.Keypair);
+                console.log('✅ solanaWeb3.SystemProgram:', typeof window.solanaWeb3.SystemProgram);
+            }
+        });
+    </script>
+    
+    <!-- Metaplex SDK for NFT creation - try multiple sources -->
+    <script src="https://unpkg.com/@metaplex-foundation/js@0.19.4/dist/index.umd.js" onerror="console.log('Primary Metaplex CDN failed')"></script>
+    <script>
+        // Fallback Metaplex loading
+        if (typeof window.Metaplex === 'undefined') {
+            console.log('Loading Metaplex from alternative CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@metaplex-foundation/js@0.19.4/dist/index.umd.js';
+            script.onload = () => console.log('Alternative Metaplex CDN loaded');
+            script.onerror = () => console.log('Alternative Metaplex CDN also failed');
+            document.head.appendChild(script);
+        }
+    </script>
+</head>
+<body>
+    <audio id="background-music" src="audio/adventure_music.mp3" loop></audio>
+    <!-- Skip to main content for screen readers -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Wallet Connection Screen -->
+    <div id="wallet-screen" class="screen" role="main" aria-labelledby="wallet-title">
+        <div class="wallet-container">
+            <h1 id="wallet-title">Welcome to the Post-Scouring Wasteland</h1>
+            <div class="wallet-content">
+                <p class="lore-text">
+                    The world lies in ruins after The Scouring drained all magic from existence.
+                    As a rare Prospector with the innate ability to sense magical artifacts,
+                    you are humanity's hope for restoration.
+                </p>
+                <p class="lore-text">
+                    To begin your perilous journey and forge the companions who will aid you
+                    in the dangerous wasteland ahead, you must first establish your identity
+                    in this realm.
+                </p>
+                <div class="wallet-status" id="wallet-status">
+                    <button id="connect-wallet-btn" class="primary-button" type="button">
+                        Connect Wallet to Begin Your Journey
+                    </button>
+                    <div id="wallet-connected" class="hidden" style="display: none;">
+                        <p class="success-message">
+                            ✨ Welcome, Prospector <span id="wallet-address"></span>
+                        </p>
+                        <p class="success-subtext">Your identity is confirmed. You may now forge your companions.</p>
+                        <button id="begin-creation-btn" class="primary-button" type="button">
+                            Begin Character Creation
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="creation-screen" class="screen hidden" role="main" aria-labelledby="creation-title">
+        <div id="creation-header">
+            <h1 id="creation-title">Create Your Warden</h1>
+            <div class="progress-container" id="progress-container" role="progressbar" aria-label="Character creation progress">
+                <!-- Progress orbs will be dynamically added here -->
+            </div>
+            <h2 id="creation-question">Question placeholder</h2>
+        </div>
+        <div class="character-preview" id="character-preview" aria-label="Character creation preview">
+            <!-- Character building preview will be shown here -->
+        </div>
+        <div id="creation-main" id="main-content">
+            <div id="creation-image-container" aria-live="polite">
+                <img id="creation-main-image" src="" alt="Selected character option" loading="lazy">
+            </div>
+            <div id="creation-options" role="radiogroup" aria-labelledby="creation-question">
+                <!-- Options will be dynamically added here -->
+            </div>
+        </div>
+        <div id="creation-buttons">
+            <button id="back-button" type="button" aria-describedby="creation-question" class="hidden">Back</button>
+            <button id="next-button" type="button" aria-describedby="creation-question">Next</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="screen hidden" role="main" aria-label="Adventure Log">
+        <header id="adventure-log-header">
+            <div id="character-panels-container">
+                <div id="party-info">
+                    <div class="character-header-item">
+                        <div class="header-portrait" id="header-warden-portrait">
+                            <img src="images/test_warden.png" alt="Warden">
+                            <span id="header-warden-name">Warden</span>
+                        </div>
+                        <button class="character-settings-btn" id="warden-details-btn" aria-label="View Warden Details">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <div class="character-header-item">
+                        <div class="header-portrait" id="header-scholar-portrait">
+                            <img src="images/test_scholar.png" alt="Scholar">
+                            <span id="header-scholar-name">Scholar</span>
+                        </div>
+                        <button class="character-settings-btn" id="scholar-details-btn" aria-label="View Scholar Details">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="quest-section-container">
+                <div id="quest-info">
+                    <h2 id="quest-title">No Active Quest</h2>
+                    <p id="quest-objective">Click "Start New Quest" to begin.</p>
+                </div>
+                <div id="quest-controls">
+                    <button id="start-quest-btn" class="quest-button" type="button">Start New Quest</button>
+                </div>
+            </div>
+        </header>
+
+        <main id="adventure-log-messages" role="log" aria-live="polite">
+            <!-- All messages (DM, User, Warden, Scholar) will appear here -->
+        </main>
+
+        <footer id="adventure-log-input-area" role="form">
+            <div id="target-selection">
+                <span id="target-label">Speak to:</span>
+                <button class="target-btn active" id="target-warden" data-target="warden" aria-pressed="true">
+                    <img src="images/test_warden.png" alt="Warden">
+                </button>
+                <button class="target-btn" id="target-scholar" data-target="scholar" aria-pressed="false">
+                    <img src="images/test_scholar.png" alt="Scholar">
+                </button>
+            </div>
+            <label for="message-input" class="visually-hidden">Type your message</label>
+            <textarea id="message-input" placeholder="Direct your companion..." aria-label="Message input" rows="2"></textarea>
+            <button id="send-button" type="button" aria-label="Send message">
+                <span class="button-text">Send</span>
+                <span class="loading-spinner hidden" aria-hidden="true"></span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Character Summary Modal -->
+    <div id="character-summary-modal" class="modal-backdrop" role="dialog" aria-labelledby="modal-title" aria-modal="true" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Character Details</h3>
+                <button class="modal-close" aria-label="Close character details">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Character details will be dynamically populated here -->
+            </div>
+            <div class="modal-footer">
+                <button id="modal-mint-btn" class="mint-button">Mint as NFT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error notification area -->
+    <div id="error-notification" class="error-notification hidden" role="alert" aria-live="assertive">
+        <span class="error-message"></span>
+        <button class="error-close" aria-label="Close error message">&times;</button>
+    </div>
+
+    <!-- Quest Scroll Modal -->
+    <div id="quest-scroll-modal" class="modal-backdrop hidden" role="dialog" aria-labelledby="quest-scroll-title" aria-modal="true">
+        <div class="quest-scroll-content">
+            <h2 id="quest-scroll-title">A New Quest Awaits...</h2>
+            <div id="quest-scroll-body">
+                <!-- Quest description will be populated here -->
+            </div>
+            <div class="quest-scroll-footer">
+                <button id="accept-quest-btn" class="primary-button">Accept Quest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main application script -->
+    <script src="app.js"></script>
+</body>
+</html>

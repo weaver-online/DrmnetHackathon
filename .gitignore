@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables
+.env
+.env.*
+ai.env
+gen-lang-client-*.json
+
+# Audio files
+/public/audio/
+
+# OS-specific
+.DS_Store
+Thumbs.db
